@@ -44,6 +44,8 @@ def get_argparser():
     parser.add_argument("--test_only", action='store_true', default=False)
     parser.add_argument("--save_val_results", action='store_true', default=False,
                         help="save segmentation results to \"./results\"")
+    parser.add_argument("--save_val_results_path",type = str,  default='./results/',
+                        help="save segmentation results to \"./results\"")
     parser.add_argument("--total_itrs", type=int, default=30e3,
                         help="epoch number (default: 30k)")
     parser.add_argument("--lr", type=float, default=0.01,
@@ -151,7 +153,8 @@ def get_dataset(opts):
                              split='val', transform=val_transform)
         if opts.test_only:
             path = os.path.join(opts.data_root, 'gtFine/test/canada/')
-            imgs = [Image.open(os.path.join(path,elem)).convert('RGB') for elem in os.listdir(path)]
+            paths = sorted([os.path.join(path, x) for x in os.listdir(path)])
+            imgs = [Image.open(x) for x in paths]
             imgs = [val_transform(img,img) for img in imgs]
             test_dst = imgs
             
@@ -167,8 +170,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     if opts.save_val_results:
-        if not os.path.exists('results'):
-            os.mkdir('results')
+        if not os.path.exists(opts.save_val_results_path):
+            os.mkdir(opts.save_val_results_path)
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
@@ -199,9 +202,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     target = loader.dataset.decode_target(target).astype(np.uint8)
                     pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
-                    Image.fromarray(image).save('results/%d_image.png' % img_id)
-                    Image.fromarray(target).save('results/%d_target.png' % img_id)
-                    Image.fromarray(pred).save('results/%d_pred.png' % img_id)
+                    Image.fromarray(image).save(os.path.join(opts.save_val_results_path,'%d_image.png' % img_id))
+                    Image.fromarray(target).save(os.path.join(opts.save_val_results_path,'%d_target.png' % img_id))
+                    Image.fromarray(pred).save(os.path.join(opts.save_val_results_path,'%d_pred.png' % img_id))
 
                     fig = plt.figure()
                     plt.imshow(image)
@@ -210,7 +213,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     ax = plt.gca()
                     ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                     ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
+                    plt.savefig(os.path.join(opts.save_val_results_path,'%d_overlay.png' % img_id), bbox_inches='tight', pad_inches=0)
                     plt.close()
                     img_id += 1
 
@@ -222,8 +225,8 @@ def infer(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     if opts.save_val_results:
-        if not os.path.exists('results'):
-            os.mkdir('results')
+        if not os.path.exists(opts.save_val_results_path):
+            os.mkdir(opts.save_val_results_path)
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
@@ -250,8 +253,8 @@ def infer(opts, model, loader, device, metrics, ret_samples_ids=None):
                     print(pred.shape)
                     #pred[pred == 255] = 19  #loader.dataset.decode_target(pred).astype(np.uint8)
                     pred = (pred==0) + (pred==1) + (pred == 9)  #merge road, sidewalk, terrain
-                    Image.fromarray(image).save('results/%d_image.png' % img_id)
-                    Image.fromarray(pred).save('results/%d_pred.png' % img_id)
+                    Image.fromarray(image).save(os.path.join(opts.save_val_results_path,'%d_image.png' % img_id))
+                    Image.fromarray(pred).save(os.path.join(opts.save_val_results_path,'%d_pred.png' % img_id))
 
                     fig = plt.figure()
                     plt.imshow(image)
@@ -260,7 +263,7 @@ def infer(opts, model, loader, device, metrics, ret_samples_ids=None):
                     ax = plt.gca()
                     ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                     ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
+                    plt.savefig(os.path.join(opts.save_val_results_path,'%d_overlay.png' % img_id), bbox_inches='tight', pad_inches=0)
                     plt.close()
                     img_id += 1
     return ret_samples
