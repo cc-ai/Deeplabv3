@@ -1,3 +1,7 @@
+The code from [this repo](https://github.com/VainF/DeepLabV3Plus-Pytorch) with modifications to make inferences on a test set and compute ground masks with the Deeplabv3+MobileNet model pretrained on Cityscapes. 
+We also output binary ground masks by merging the classes road, sidewalk, terrain. 
+
+
 # DeepLabv3Plus-Pytorch
 
 DeepLabV3 and DeepLabV3+ with MobileNetv2 and ResNet backbones for Pytorch.
