@@ -1,20 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import os
-import numpy as np
-from PIL import Image
-import matplotlib
-import matplotlib.pyplot as plt
-
-
-# # Compare Deeplab v2 and v3
-
-# In[12]:
-
 
 import os
 import numpy as np
@@ -52,25 +35,20 @@ def get_concat_v(im1, im2):
     dst.paste(im2, (0, im1.height))
     return dst
 
-save_path = './overlays'
+def main():
+    save_path = './overlays'
 
-for i in range(len(masks_v2)):
-    figv2 = overlay(Image.open(image_v2[i]), Image.open(masks_v2[i]))
-    figv3 = overlay(Image.open(image_v3[i]), Image.open(masks_v3[i]))
-    figv2.savefig("tmpv2.png")
-    figv3.savefig("tmpv3.png")
-    imgv2 = Image.open("tmpv2.png")
-    imgv3 = Image.open("tmpv3.png")
-    im = get_concat_v(imgv2, imgv3).save(os.path.join(save_path, os.path.basename(image_v2[i])))
-
-
-# In[7]:
-
-
-Image.open('./results_2/0_pred.png').size
-
-
-# In[ ]:
+    for i in range(len(masks_v2)):
+        figv2 = overlay(Image.open(image_v2[i]), Image.open(masks_v2[i]))
+        figv3 = overlay(Image.open(image_v3[i]), Image.open(masks_v3[i]))
+        figv2.savefig("tmpv2.png")
+        figv3.savefig("tmpv3.png")
+        imgv2 = Image.open("tmpv2.png")
+        imgv3 = Image.open("tmpv3.png")
+        im = get_concat_v(imgv2, imgv3).save(os.path.join(save_path, os.path.basename(image_v2[i])))
+        
+if __name__ == "__main__":
+    main()
 
 
 
